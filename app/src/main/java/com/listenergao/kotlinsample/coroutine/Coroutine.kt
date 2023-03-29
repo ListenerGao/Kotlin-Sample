@@ -2,6 +2,17 @@ package com.listenergao.kotlinsample.coroutine
 
 import kotlinx.coroutines.*
 
+
+fun main() {
+
+    val coroutine = Coroutine()
+//    coroutine.startOne()
+//    coroutine.startTwo()
+    coroutine.startThree()
+
+}
+
+
 /**
  * 协程
  * 1、广义的协程，可以理解成"互相协作的程序"；
@@ -16,17 +27,6 @@ import kotlinx.coroutines.*
  * 设置 VM 参数，可以打印出协程信息
  * -Dkotlinx.coroutines.debug
  */
-
-
-fun main() {
-
-    val coroutine = Coroutine()
-//    coroutine.startOne()
-//    coroutine.startTwo()
-    coroutine.startThree()
-
-}
-
 class Coroutine {
 
     /**
