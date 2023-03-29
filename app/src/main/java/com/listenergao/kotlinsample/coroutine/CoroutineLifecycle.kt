@@ -7,10 +7,10 @@ import kotlin.random.Random
 fun main() {
 
     val coroutineLifecycle = CoroutineLifecycle()
-//    coroutineLifecycle.test()
+    coroutineLifecycle.test()
 //    coroutineLifecycle.test2()
 //    coroutineLifecycle.test3()
-    coroutineLifecycle.test4()
+//    coroutineLifecycle.test4()
 
 }
 
@@ -18,29 +18,35 @@ fun main() {
  * kotlin 协程的 Job (句柄)
  *
  * 如何理解 Job 是协程的句柄？
- * Job 与协程的关系有点像 "遥控器和空调的关系"：
- *      遥控器可以监测空调的运行状态；Job 也可以监测协程的运行状态；
- *      遥控器可以操控空调的运行状态；Job 也可以操控协程的运行状态；
- * 所以，从某种程度上来说，遥控器是空调对外暴露的一个"句柄"。
+ * Job 与协程的关系有点像 "遥控器和空调的关系" ：
+ *      遥控器可以 "监测" 空调的运行状态；Job 也可以 "监测" 协程的运行状态；
+ *      遥控器可以 "操控" 空调的运行状态；Job 也可以 "操控" 协程的运行状态；
+ * 所以，从某种程度上来说，遥控器是空调对外暴露的一个 "句柄"。
  *
  * 当我们使用 launch 和 async 创建一个协程的时候，同时也会创建一个对应的 Job 对象。
- * Job 是我们理解 协程声明周期、结构化并发 的关健知识点。通过 Job 暴露的 API，我们还可以让不同的协程之间
+ * Job 是我们理解 协程生命周期、结构化并发 的关健知识点。通过 Job 暴露的 API，我们还可以让不同的协程之间
  * 相互配合，从而实现更加复杂的功能。
  *
  * 使用 Job 监测协程生命周期状态：
- *  Job.isActive 协程是否处于活跃状态
+ *  Job.isActive     协程是否处于活跃状态
  *  Job.isCancelled  协程是否处于取消状态
  *  Job.isCompleted  协程是否处于结束状态
  *
  * 使用 Job 操控协程：
  *  Job.cancel() 取消协程
- *  Job.start() 启动协程
+ *  Job.start()  启动协程
  *
  */
 class CoroutineLifecycle {
 
     /**
      * 直接启动协程
+     *
+     * Job 手动调用 cancel 取消协程，生命周期状态：
+     *
+     * isActive = false
+     * isCancelled = true
+     * isCompleted = true
      */
     fun test() {
         runBlocking {
@@ -48,10 +54,12 @@ class CoroutineLifecycle {
                 logX("Coroutine Start")
                 delay(1000)
             }
+            delay(500)
             job.log()
             job.cancel()
             job.log()
             delay(2000)
+            job.log()
 
         }
     }
@@ -59,7 +67,7 @@ class CoroutineLifecycle {
     /**
      * 懒加载启动协程
      *
-     * Job 手动调用 cancel取消协程，生命周期状态：
+     * Job 手动调用 cancel 取消协程，生命周期状态：
      *
      * isActive = false
      * isCancelled = true

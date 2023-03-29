@@ -34,7 +34,7 @@ fun main() {
  *
  * 协程和挂起函数都是支持挂起和恢复，它们两个是同一个东西吗？
  * 我们可以简单认为：挂起和恢复，是协程的一种底层能力；而挂起函数，是这种底层能力的一种表现形式，
- * 通过暴露出来的 suspend 关键字，我们开发这可以在上层，非常方便的使用这种底层能力。
+ * 通过暴露出来的 suspend 关键字，我们开发者可以在上层，非常方便的使用这种底层能力。
  *
  *
  */
@@ -50,7 +50,7 @@ class SuspendFunction {
      *      每一次从主线程切换到 IO 线程，都是一次协程的挂起；
      *      每一次从 IO 线程切换到主线程，都是一次协程的恢复；
      *
-     * 挂起和恢复是挂起函数特有的能力，不同函数不具备。
+     * 挂起和恢复是挂起函数特有的能力，普通函数不具备。
      *
      * 挂起，只是将程序执行流程转移到了其它线程，主线程不会阻塞。
      *
@@ -62,20 +62,14 @@ class SuspendFunction {
             val time = measureTime {
 
                 val token = getToken()
-                println("token:$token")
+                logX("token:$token")
                 val userInfo = getUserInfo(token)
-                println("userInfo:$userInfo")
+                logX("userInfo:$userInfo")
                 val devices = getDevices(userInfo)
-                println("devices:$devices")
-                val log = """
-                    sync:
-                    token:$token,
-                    userInfo:$userInfo,
-                    devices:$devices
-            """.trimIndent()
-                println(log)
+                logX("devices:$devices")
+
             }
-            println("sync cost time:$time")
+            logX("sync cost time:$time")
 
 
         }
@@ -90,7 +84,7 @@ class SuspendFunction {
      * // Continuation 相当于 Callback
      * public final Object getToken(@NotNull Continuation var1) {
      *      ...
-     *      return ""Token
+     *      return "Token"
      * }
      *
      * 我们看一下 Continuation 在 kotlin 中的定义
