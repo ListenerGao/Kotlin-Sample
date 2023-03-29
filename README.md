@@ -10,3 +10,4 @@
 * [kotlin coroutine 启动方式](https://github.com/ListenerGao/Kotlin-Sample/blob/main/app/src/main/java/com/listenergao/kotlinsample/coroutine/Coroutine.kt)
 * [kotlin coroutine 挂起函数](https://github.com/ListenerGao/Kotlin-Sample/blob/main/app/src/main/java/com/listenergao/kotlinsample/coroutine/CoroutineLifecycle.kt)
 * [kotlin coroutine 生命周期](https://github.com/ListenerGao/Kotlin-Sample/blob/main/app/src/main/java/com/listenergao/kotlinsample/coroutine/CoroutineLifecycle.kt)
+* [kotlin coroutine job 与结构化并发](https://github.com/ListenerGao/Kotlin-Sample/blob/main/app/src/main/java/com/listenergao/kotlinsample/coroutine/KotlinStructure.kt)
