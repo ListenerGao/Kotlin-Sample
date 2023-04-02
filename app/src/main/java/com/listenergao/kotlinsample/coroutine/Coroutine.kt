@@ -61,6 +61,7 @@ class Coroutine {
      *
      *
      * GlobalScope 不建议使用。
+     * 我们使用 GlobalScope 启动协程时，它将在顶级协程中启动，因为它是全局的，并且会一直保留到您的应用程序死掉为止。
      */
     fun startOne() {
         GlobalScope.launch {
