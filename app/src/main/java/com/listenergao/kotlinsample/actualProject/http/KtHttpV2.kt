@@ -7,6 +7,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.lang.reflect.Method
 import java.lang.reflect.Proxy
+import kotlin.reflect.KClass
 
 fun main() {
     KtHttpV2.baseUrl = "https://www.wanandroid.com"
@@ -14,6 +15,11 @@ fun main() {
     val apiService = KtHttpV2.create<ApiService>()
     val articleInfo = apiService.getArticle(cid = 60)
     println(articleInfo)
+
+    // kotlin 类型的 Class
+    val kClass: KClass<KtHttpV2> = KtHttpV2::class
+    // java 类型的 Class
+    val clazz: Class<KtHttpV2> = KtHttpV2::class.java
 }
 
 object KtHttpV2 {
