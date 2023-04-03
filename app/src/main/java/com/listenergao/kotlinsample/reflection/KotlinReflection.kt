@@ -129,7 +129,7 @@ data class School(
 )
 
 data class Student(
-    val name: String,
-    val score: Float,
-    val height: Int
+    var name: String,
+    var score: Float,
+    var height: Int
 )
