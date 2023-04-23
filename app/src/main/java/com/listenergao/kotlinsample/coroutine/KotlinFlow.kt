@@ -9,6 +9,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
@@ -34,7 +35,8 @@ fun main() {
 //    kotlinFlow.switchFlowContextWithLaunchIn()
 //    kotlinFlow.testFlow()
 //    kotlinFlow.testFlowTwo()
-    kotlinFlow.testFlowSample()
+//    kotlinFlow.testFlowSample()
+    kotlinFlow.testFlowSampleTwo()
 }
 
 /**
@@ -409,5 +411,41 @@ class KotlinFlow {
         // 延时 2s 输出日志
         delay(2000)
 
+    }
+
+    /**
+     * 计时器功能
+     * 模拟流速不均匀问题，上游每隔 1s 发送一条数据，下游处理数据需要花费 3s，我们通过日志可以观察到，
+     * 计时器每 3s 才更新一次数据，这样计时器就不准确了。
+     * 该问题的本质是下游处理数据速度过慢，导致管道中存在大量积压的数据，并且积压的数据会一个个传递到下游，
+     * 即使这些数据已经过期了。
+     *
+     * 由于 Flow 是基于观察者模式的响应式编程，上游发送了一个数据，下游就会接收到一个数据。但是下游处理数据的速度
+     * 不一定和上游发送数据的速度是一致的，如果下游处理速度过慢，就可能出现管道阻塞的情况。
+     *
+     * 响应式编程框架都可能遇到这种问题，RxJava 中有专门的背压策略来处理这类问题。Flow 中也有此类问题的处理方案，
+     * 此案例中，我们使用一个简单的方式来解决这个问题。我们使用 Flow 提供的 collectLatest{} 来解决即可。
+     * collectLatest{} 只接收处理最新的数据。如果有新数据到来，而前一个数据还没有处理完，则会将前一个数据剩余
+     * 的处理逻辑全部取消。
+     *
+     */
+    fun testFlowSampleTwo() = runBlocking {
+        var time = 0
+        flow {
+            while (true) {
+                emit(time)
+                delay(1000)
+                time++
+            }
+        }
+            // 存在背压问题
+//            .collect {
+//                println("计时器更新: $it")
+//                delay(3000L)
+//            }
+            .collectLatest {
+                println("计时器更新: $it")
+                delay(3000L)
+            }
     }
 }
