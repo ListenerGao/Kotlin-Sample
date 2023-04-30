@@ -2,6 +2,7 @@ package com.listenergao.kotlinsample.coroutine
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapConcat
@@ -15,8 +16,11 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.reduce
 import kotlinx.coroutines.flow.sample
+import kotlinx.coroutines.flow.zip
 import kotlinx.coroutines.runBlocking
 import java.time.LocalTime
+import kotlin.time.ExperimentalTime
+import kotlin.time.measureTime
 
 
 fun main() {
@@ -28,7 +32,9 @@ fun main() {
 //    flowOperator.testOperatorFold()
 //    flowOperator.testOperatorFlatMapConcat()
 //    flowOperator.testOperatorFlatMapMerge()
-    flowOperator.testOperatorFlatMapLatest()
+//    flowOperator.testOperatorFlatMapLatest()
+//    flowOperator.testOperatorZip()
+    flowOperator.testOperatorBuffer()
 }
 
 /**
@@ -237,4 +243,112 @@ class FlowOperator {
                 println("collect: $it")
             }
     }
+
+    /**
+     * zip ：也是作用在两个 Flow 上，使用 zip 连接的两个 flow 是并行运行的关系。
+     * 这点和 flatMap 差别很大，因为 flatMap 的运行方式是一个 flow 中的数据流向另一个 flow，是串行关系。
+     *
+     * zip 函数的规则是，只要其中一个 flow 中的数据全部处理完毕，就会终止运行，剩余未处理的数据将不会得到处理。
+     * 如下面的例子中，flow1 中的 4、5 两个值就会被丢弃。
+     *
+     * 验证两个 flow 是并行的：
+     * flow1 中延时 3s，flow2 中延时 2s，如果是串行的话，花费时间应该在 5s 以上。
+     * 实际运行中，代码耗时时间在 3s 左右，由此可证明 flow1 和 flow2 是并行关系，最终的耗时取决于运行耗时更久的那个 flow。
+     */
+    @OptIn(ExperimentalTime::class)
+    fun testOperatorZip() = runBlocking {
+        // 计算耗时时间
+        val costTime = measureTime {
+            val flow1 = flow {
+                emit(1)
+                emit(2)
+                delay(3000)
+                emit(3)
+                emit(4)
+                emit(5)
+            }
+            val flow2 = flow {
+                emit("A")
+                emit("B")
+                delay(2000)
+                emit("C")
+            }
+
+            flow1.zip(flow2) { values1, value2 ->
+                value2 + values1
+            }.collect {
+                println("time:${LocalTime.now()}  collect:$it")
+            }
+        }
+
+        println("costTime: $costTime")
+
+    }
+
+    fun testOperatorBuffer() = runBlocking {
+
+        /**
+         * 测试发送三条数据，每条数据间隔 1s ，在 collect 函数中逐个对数据进行处理，处理每条数据耗时 1s。
+         * 我们在 collect 函数中处理数据耗时 1s，flow 中发送数据同样要等待 1s。collect 函数处理完成数据之后，
+         * flow 函数恢复运行，发现又要等待 1s，这样 2s 中才能发送一条数据。
+         * 从测试结果中可以看出，collect 函数中的数据处理是会 flow 函数中的数据发送产生影响。默认情况下，collect 函数
+         * 和 flow 函数是运行在同一个协程中，因此 collect 函数没有执行完毕，flow 函数中的代码也会挂起等待。
+         *
+         * 不知道上述行为是否是你想要的，如果不是的话，可以借助 buffer 函数就能实现另外一种你想要的行为。
+         *
+         */
+        fun testSample() = runBlocking {
+            flow {
+                emit(1)
+                delay(1000)
+                emit(2)
+                delay(1000)
+                emit(3)
+            }.onEach {
+                println("${LocalTime.now()}  $it is ready")
+            }.collect {
+                delay(1000)
+                println("${LocalTime.now()}  $it is handled")
+            }
+        }
+
+//        testSample()
+
+
+        /**
+         * buffer 函数会让 flow 函数和 collect 函数运行在不同的协程当中，这样 flow 中的数据发送就不会受 collect 函数的影响了。
+         * 因为有了 buffer 的存在，数据发送和数据处理变得互不干扰。
+         *
+         * buffer 函数其实就是一种背压的处理模式，它提供了一份缓存区，当 flow 数据流速不均匀时，使用这份缓存
+         * 来保证程序的运行效率。
+         *
+         * flow 函数只管发送自己的数据，它并不关心数据有没有被处理，反正都缓存在 buffer 当中。
+         * 而 collect 函数只需要一直从 buffer 中获取数据进行处理就可以了。
+         *
+         * 如果流速不均匀问题持放大，缓存区的内容越来越多时，又该怎们办？这时，我们需要引入一种新的背压策略，
+         * 适当的丢弃一些数据。可以使用 conflate 函数。
+         */
+        fun testSampleBuffer() = runBlocking {
+            flow {
+                emit(1)
+                delay(1000)
+                emit(2)
+                delay(1000)
+                emit(3)
+            }.onEach {
+                println("${LocalTime.now()}  $it is ready")
+            }
+                .buffer() // 不同点
+                .collect {
+                    delay(1000)
+                    println("${LocalTime.now()}  $it is handled")
+                }
+        }
+
+        testSampleBuffer()
+
+
+    }
+
+
 }
