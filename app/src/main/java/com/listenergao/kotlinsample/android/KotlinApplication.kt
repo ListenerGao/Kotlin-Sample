@@ -1,4 +1,4 @@
-package com.listenergao.kotlinsample
+package com.listenergao.kotlinsample.android
 
 import android.app.Application
 

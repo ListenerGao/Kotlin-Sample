@@ -1,7 +1,7 @@
 package com.listenergao.kotlinsample.`object`
 
 import android.view.View
-import com.listenergao.kotlinsample.KotlinApplication
+import com.listenergao.kotlinsample.android.KotlinApplication
 
 
 fun main() {

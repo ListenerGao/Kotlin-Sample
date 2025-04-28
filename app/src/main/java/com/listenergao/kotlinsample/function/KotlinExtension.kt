@@ -2,7 +2,7 @@ package com.listenergao.kotlinsample.function
 
 import android.view.View
 import android.view.ViewGroup
-import com.listenergao.kotlinsample.KotlinApplication
+import com.listenergao.kotlinsample.android.KotlinApplication
 
 fun main() {
 
